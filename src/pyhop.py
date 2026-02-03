@@ -8,7 +8,7 @@ Copyright 2013 Dana S. Nau - http://www.cs.umd.edu/~nau
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+	 http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -97,60 +97,66 @@ Pyhop provides the following classes and functions:
 
 from __future__ import print_function
 import copy,sys, pprint
+from copy import deepcopy
+
+end_time = 0
+def set_end_time(time):
+	global end_time
+	end_time = time
 
 ############################################################
 # States and goals
 
 class State():
-    """A state is just a collection of variable bindings."""
-    def __init__(self,name):
-        self.__name__ = name
+	"""A state is just a collection of variable bindings."""
+	def __init__(self,name):
+		self.__name__ = name
 
 class Goal():
-    """A goal is just a collection of variable bindings."""
-    def __init__(self,name):
-        self.__name__ = name
+	"""A goal is just a collection of variable bindings."""
+	def __init__(self,name):
+		self.__name__ = name
 
 
 ### print_state and print_goal are identical except for the name
 
 def print_state(state,indent=4):
-    """Print each variable in state, indented by indent spaces."""
-    if state != False:
-        for (name,val) in vars(state).items():
-            if name != '__name__':
-                for x in range(indent): sys.stdout.write(' ')
-                sys.stdout.write(state.__name__ + '.' + name)
-                print(' =', val)
-    else: print('False')
+	"""Print each variable in state, indented by indent spaces."""
+	if state != False:
+		for (name,val) in vars(state).items():
+			if name != '__name__':
+				for x in range(indent): sys.stdout.write(' ')
+				sys.stdout.write(state.__name__ + '.' + name)
+				print(' =', val)
+	else: print('False')
 
 def print_goal(goal,indent=4):
-    """Print each variable in goal, indented by indent spaces."""
-    if goal != False:
-        for (name,val) in vars(goal).items():
-            if name != '__name__':
-                for x in range(indent): sys.stdout.write(' ')
-                sys.stdout.write(goal.__name__ + '.' + name)
-                print(' =', val)
-    else: print('False')
+	"""Print each variable in goal, indented by indent spaces."""
+	if goal != False:
+		for (name,val) in vars(goal).items():
+			if name != '__name__':
+				for x in range(indent): sys.stdout.write(' ')
+				sys.stdout.write(goal.__name__ + '.' + name)
+				print(' =', val)
+	else: print('False')
 
 ############################################################
 # Helper functions that may be useful in domain models
 
 def forall(seq,cond):
-    """True if cond(x) holds for all x in seq, otherwise False."""
-    for x in seq:
-        if not cond(x): return False
-    return True
+	"""True if cond(x) holds for all x in seq, otherwise False."""
+	for x in seq:
+		if not cond(x): return False
+	return True
 
 def find_if(cond,seq):
-    """
-    Return the first x in seq such that cond(x) holds, if there is one.
-    Otherwise return None.
-    """
-    for x in seq:
-        if cond(x): return x
-    return None
+	"""
+	Return the first x in seq such that cond(x) holds, if there is one.
+	Otherwise return None.
+	"""
+	for x in seq:
+		if cond(x): return x
+	return None
 
 ############################################################
 # Commands to tell Pyhop what the operators and methods are
@@ -159,130 +165,132 @@ operators = {}
 methods = {}
 
 def declare_operators(*op_list):
-    """
-    Call this after defining the operators, to tell Pyhop what they are. 
-    op_list must be a list of functions, not strings.
-    """
-    operators.update({op.__name__:op for op in op_list})
-    return operators
+	"""
+	Call this after defining the operators, to tell Pyhop what they are.
+	op_list must be a list of functions, not strings.
+	"""
+	operators.update({op.__name__:op for op in op_list})
+	return operators
 
 def declare_methods(task_name, *method_list):
-    """
-    Call this once for each task, to tell Pyhop what the methods are.
-    task_name must be a string.
-    method_list must be a list of functions, not strings.
-    """
-    methods.update({task_name:list(method_list)})
-    return methods[task_name]
+	"""
+	Call this once for each task, to tell Pyhop what the methods are.
+	task_name must be a string.
+	method_list must be a list of functions, not strings.
+	"""
+	methods.update({task_name:list(method_list)})
+	return methods[task_name]
 
 # start cm146 modification
 checks = []
 def add_check(func):
-    checks.append(func)
+	checks.append(func)
 
 get_custom_method_order = None
 def define_ordering(func):
-    global get_custom_method_order
-    get_custom_method_order = func
+	global get_custom_method_order
+	get_custom_method_order = func
 
 def reorder_methods(state, task1, tasks, plan, depth, calling_stack, methods):
-    if get_custom_method_order is None:
-        return methods
-    new_methods = get_custom_method_order(state, task1, tasks, plan, depth, calling_stack, copy.deepcopy(methods))
-    # for i, method in enumerate(methods):
-    #     if method not in new_methods:
-    #         print(f'ERROR: method ordering cannot be changed from:\n' +
-    #               f'\t{[get_subtasks(method, state, task1) for method in methods]}\nto\n' +
-    #               f'\t{[get_subtasks(method, state, task1) for method in new_methods]}\n' +
-    #               f': method {i} doesn\'t exist in the new method order. New method order is IGNORED.\n')
-    #         return methods
-    # for i, method in enumerate(new_methods):
-    #     if method not in methods:
-    #         print(f'ERROR: method ordering cannot be changed from:\n' +
-    #               f'\t{[get_subtasks(method, state, task1) for method in methods]}\nto\n' +
-    #               f'\t{[get_subtasks(method, state, task1) for method in new_methods]}\n' +
-    #               f': method {i} did\'t exist in the previous method order. New method order is IGNORED.\n')
-    #         return methods
-    return new_methods
+	if get_custom_method_order is None:
+		return methods
+	new_methods = get_custom_method_order(state, task1, tasks, plan, depth, calling_stack, copy.deepcopy(methods))
+	# for i, method in enumerate(methods):
+	#     if method not in new_methods:
+	#         print(f'ERROR: method ordering cannot be changed from:\n' +
+	#               f'\t{[get_subtasks(method, state, task1) for method in methods]}\nto\n' +
+	#               f'\t{[get_subtasks(method, state, task1) for method in new_methods]}\n' +
+	#               f': method {i} doesn\'t exist in the new method order. New method order is IGNORED.\n')
+	#         return methods
+	# for i, method in enumerate(new_methods):
+	#     if method not in methods:
+	#         print(f'ERROR: method ordering cannot be changed from:\n' +
+	#               f'\t{[get_subtasks(method, state, task1) for method in methods]}\nto\n' +
+	#               f'\t{[get_subtasks(method, state, task1) for method in new_methods]}\n' +
+	#               f': method {i} did\'t exist in the previous method order. New method order is IGNORED.\n')
+	#         return methods
+	return new_methods
 
 def get_subtasks(method, state, curr_task):
-    return method(state,*curr_task[1:])
+	return method(state,*curr_task[1:])
 # end cm146 modification
 
 ############################################################
 # Commands to find out what the operators and methods are
 
 def print_operators(olist=operators):
-    """Print out the names of the operators"""
-    print('OPERATORS:', ', '.join(olist))
+	"""Print out the names of the operators"""
+	print('OPERATORS:', ', '.join(olist))
 
 def print_methods(mlist=methods):
-    """Print out a table of what the methods are for each task"""
-    print('{:<14}{}'.format('TASK:','METHODS:'))
-    for task in mlist:
-        print('{:<14}'.format(task) + ', '.join([f.__name__ for f in mlist[task]]))
+	"""Print out a table of what the methods are for each task"""
+	print('{:<14}{}'.format('TASK:','METHODS:'))
+	for task in mlist:
+		print('{:<14}'.format(task) + ', '.join([f.__name__ for f in mlist[task]]))
 
 ############################################################
 # The actual planner
 
 def pyhop(state,tasks,verbose=0):
-    """
-    Try to find a plan that accomplishes tasks in state. 
-    If successful, return the plan. Otherwise return False.
-    """
-    if verbose>0: print('** pyhop, verbose={}: **\n   state = {}\n   tasks = {}'.format(verbose, state.__name__, tasks))
-    result = seek_plan(state,tasks,[],0,verbose)
-    if verbose>0: print('** result =',result,'\n')
-    return result
+	"""
+	Try to find a plan that accomplishes tasks in state.
+	If successful, return the plan. Otherwise return False.
+	"""
+	if verbose>0: print('** pyhop, verbose={}: **\n   state = {}\n   tasks = {}'.format(verbose, state.__name__, tasks))
+	result = seek_plan(state,tasks,[],0,verbose)
+	if verbose>0: print('** result =',result,'\n')
+	return result
 
 # cm146 modification: add calling stack as parameter
 def seek_plan(state,tasks,plan,depth,verbose=0,calling_stack=[]):
-    """
-    Workhorse for pyhop. state and tasks are as in pyhop.
-    - plan is the current partial plan.
-    - depth is the recursion depth, for use in debugging
-    - verbose is whether to print debugging messages
-    # """
-    # print (tasks)
-    if verbose>1: print('depth {} tasks {}'.format(depth,tasks))
-    if tasks == []:
-        if verbose>2: print('depth {} returns plan {}'.format(depth,plan))
-        return plan
-    task1 = tasks[0]
+	"""
+	Workhorse for pyhop. state and tasks are as in pyhop.
+	- plan is the current partial plan.
+	- depth is the recursion depth, for use in debugging
+	- verbose is whether to print debugging messages
+	# """
+	# print (tasks)
+	set_end_time(state.time['agent'])
 
-    if task1[0] in operators:
-        if verbose>2: print('depth {} action {}'.format(depth,task1))
-        operator = operators[task1[0]]
-        newstate = operator(copy.deepcopy(state),*task1[1:])
-        if verbose>2:
-            print('depth {} new state:'.format(depth))
-            print_state(newstate)
-        if newstate:
-            solution = seek_plan(newstate,tasks[1:],plan+[task1],depth+1,verbose,calling_stack)
-            if solution != False:
-                return solution
+	if verbose>1: print('depth {} tasks {}'.format(depth,tasks))
+	if tasks == []:
+		if verbose>2: print('depth {} returns plan {}'.format(depth,plan))
+		return plan
+	task1 = tasks[0]
 
-    # start cm146 modification
-    for check in checks:
-        if check(state, task1, tasks, plan, depth, calling_stack):
-            return False
-    # end cm146 modification
+	if task1[0] in operators:
+		if verbose>2: print('depth {} action {}'.format(depth,task1))
+		operator = operators[task1[0]]
+		newstate = operator(copy.deepcopy(state),*task1[1:])
+		if verbose>2:
+			print('depth {} new state:'.format(depth))
+			print_state(newstate)
+		if newstate:
+			solution = seek_plan(newstate,tasks[1:],plan+[task1],depth+1,verbose,calling_stack)
+			if solution != False:
+				return solution
 
-    if task1[0] in methods:
-        if verbose>2: print('depth {} method instance {}'.format(depth,task1))
-        relevant = methods[task1[0]]
-        # start cm146 modification
-        if task1[0][:len("produce_")] == "produce_":
-            relevant = reorder_methods(state, task1, tasks, plan, depth, calling_stack, relevant)
-        # end cm146 modification
-        for method in relevant:
-            subtasks = method(state,*task1[1:])
-            if verbose>2:
-                print('depth {} new tasks: {}'.format(depth,subtasks))
-            # Can't just say "if subtasks:", because that's wrong if subtasks == []
-            if subtasks != False:
-                solution = seek_plan(state,subtasks+tasks[1:],plan,depth+1,verbose,calling_stack+[task1])
-                if solution != False:
-                    return solution
-    if verbose>2: print('depth {} returns failure'.format(depth))
-    return False
+	# start cm146 modification
+	for check in checks:
+		if check(state, task1, tasks, plan, depth, calling_stack):
+			return False
+	# end cm146 modification
+
+	if task1[0] in methods:
+		if verbose>2: print('depth {} method instance {}'.format(depth,task1))
+		relevant = methods[task1[0]]
+		# start cm146 modification
+		if task1[0][:len("produce_")] == "produce_":
+			relevant = reorder_methods(state, task1, tasks, plan, depth, calling_stack, relevant)
+		# end cm146 modification
+		for method in relevant:
+			subtasks = method(state,*task1[1:])
+			if verbose>2:
+				print('depth {} new tasks: {}'.format(depth,subtasks))
+			# Can't just say "if subtasks:", because that's wrong if subtasks == []
+			if subtasks != False:
+				solution = seek_plan(state,subtasks+tasks[1:],plan,depth+1,verbose,calling_stack+[task1])
+				if solution != False:
+					return solution
+	if verbose>2: print('depth {} returns failure'.format(depth))
+	return False

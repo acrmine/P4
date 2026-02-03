@@ -1,10 +1,14 @@
 {
  "Problem": {
-  "Time": 300,
+  "Time": 100000,
   "Initial": {
   },
   "Goal": {
-    "wood": 1
+    "cart": 90,
+    "rail": 90,
+    "ingot": 10,
+    "furnace": 1,
+    "iron_pickaxe": 1
   }
  },
  "Items": [

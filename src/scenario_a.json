@@ -1,10 +1,11 @@
 {
  "Problem": {
-  "Time": 300,
+  "Time": 0,
   "Initial": {
+    "plank": 1
   },
   "Goal": {
-    "wood": 1
+   "plank": 1
   }
  },
  "Items": [
